@@ -17,9 +17,9 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-  if(argc != 3){
-    cout << "[ERROR] Wrong usage you have to provide 2 arguiments, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT year WCname" <<endl;
+  if(argc < 3){
+    cout << "[ERROR] Wrong usage you have to provide a minimum of 2 arguiments, only " << argc-1 << " provided." <<endl;
+    cout << "CreateCards_topEFT year WCname [statOnly/noRates/noScales]" <<endl;
     return 0;
   }
 
@@ -43,6 +43,28 @@ int main(int argc, char *argv[]) {
   else{
     cout << "[ERROR] Wilson coefficient " << argv[2] << " not known. Select a valid WC [cHq1Re11, cHq1Re22, cHq1Re33, cHq3Re11, cHq3Re22, cHq3Re33]" <<endl;
     return 0;
+  }
+
+  bool statOnly = false;
+  bool noRates = false;
+  bool noScales = false;
+  bool noBtag = false;
+  bool noJEC = false;
+  bool noLepton = false;
+  bool noLumi = false;
+  bool noPS = false;
+  bool noFakerate = false;
+
+  if(argc > 3){
+    if(strcmp(argv[3], "statOnly") == 0)        statOnly = true;
+    else if(strcmp(argv[3], "noRates") == 0)    noRates = true;
+    else if(strcmp(argv[3], "noScales") == 0)   noScales = true;
+    else if(strcmp(argv[3], "noBtag") == 0)     noBtag = true;
+    else if(strcmp(argv[3], "noJEC") == 0)      noJEC = true;
+    else if(strcmp(argv[3], "noLepton") == 0)   noLepton = true;
+    else if(strcmp(argv[3], "noLumi") == 0)     noLumi = true;
+    else if(strcmp(argv[3], "noPS") == 0)       noPS = true;
+    else if(strcmp(argv[3], "noFakerate") == 0) noFakerate = true;
   }
 
   vector<string> WCvals;
@@ -90,74 +112,91 @@ int main(int argc, char *argv[]) {
     using ch::syst::process;
 
     // Shape uncertainties
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_correlated", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_correlated", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2018", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+    if(!statOnly){
+      if(!noBtag){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_correlated", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_correlated", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_b_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "BTag_l_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+      }
+      cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Trigger", "shape", SystMap<>::init(1.00));
+      cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PU", "shape", SystMap<>::init(1.00));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Trigger", "shape", SystMap<>::init(1.00));
+      if(!noJEC){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "JES", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "JER", "shape", SystMap<>::init(1.00));
+      }
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PU", "shape", SystMap<>::init(1.00));
+      if(!noFakerate){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Fakerate", "shape", SystMap<>::init(1.00));
+        cb.cp().process({"nonprompt"}).AddSyst(cb, "nonprompt_rate", "lnN", SystMap<>::init(1.3)); //Flat 30%
+      }
 
-    // cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "JES", "shape", SystMap<>::init(1.00));
+      cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Prefire", "shape", SystMap<>::init(1.00));
 
-    // cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "JER", "shape", SystMap<>::init(1.00));
+      if(!noLepton){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepReco", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDsys", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2016preVFP", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2016", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2017", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2018", "shape", SystMap<>::init(1.00));
+      }
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Fakerate", "shape", SystMap<>::init(1.00));
+      if(!noLumi){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_161718", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_1718", "shape", SystMap<>::init(1.00));
+      }
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Prefire", "shape", SystMap<>::init(1.00));
+      cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PDF", "shape", SystMap<>::init(1.00));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepReco", "shape", SystMap<>::init(1.00));
+      if(!noScales){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF", "shape", SystMap<>::init(1.00));
+      }
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDsys", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2016preVFP", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2016", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2017", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "LepIDstat_2018", "shape", SystMap<>::init(1.00));
+      if(!noPS){
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR", "shape", SystMap<>::init(1.00));
+        cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
+      }
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_uncorrelated_2018", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_161718", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_1718", "shape", SystMap<>::init(1.00));
+      if(!noRates){
+        // Rate uncertainties backgrounds
+        cb.cp().process({"ttX"}).AddSyst(cb, "ttX_rate", "lnN", SystMap<>::init(1.2));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PDF", "shape", SystMap<>::init(1.00));
+        cb.cp().process({"triBoson"}).AddSyst(cb, "triBoson_rate", "lnN", SystMap<>::init(1.2));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR", "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF", "shape", SystMap<>::init(1.00));
+        // Rate uncertainties signal
+        // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
+        // ZZ and WZ from AN
+        cb.cp().process({"tWZ"}).AddSyst(cb, "tWZ_rate", "lnN", SystMap<>::init(1.2));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR", "shape", SystMap<>::init(1.00));
+        cb.cp().process({"tZq"}).AddSyst(cb, "tZq_rate", "lnN", SystMap<>::init(1.033));
 
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
+        cb.cp().process({"ttZ"}).AddSyst(cb, "ttZ_rate", "lnN", SystMap<>::init(1.11));
 
-    // Rate uncertainties backgrounds
-    cb.cp().process({"nonpromt"}).AddSyst(cb, "nonpromt_rate", "lnN", SystMap<>::init(1.3));
+        cb.cp().process({"ZZ"}).AddSyst(cb, "ZZ_rate", "lnN", SystMap<>::init(1.1));
 
-    cb.cp().process({"ttX"}).AddSyst(cb, "ttX_rate", "lnN", SystMap<>::init(1.2));
+        cb.cp().process({"WZ"}).AddSyst(cb, "WZ_rate", "lnN", SystMap<>::init(1.1));
 
-    cb.cp().process({"triBoson"}).AddSyst(cb, "triBoson_rate", "lnN", SystMap<>::init(1.2));
-
-    // Rate uncertainties signal
-    // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
-    // ZZ and WZ from AN
-    cb.cp().process({"tWZ"}).AddSyst(cb, "tWZ_rate", "lnN", SystMap<>::init(1.2));
-
-    cb.cp().process({"tZq"}).AddSyst(cb, "tZq_rate", "lnN", SystMap<>::init(1.033));
-
-    cb.cp().process({"ttZ"}).AddSyst(cb, "ttZ_rate", "lnN", SystMap<>::init(1.11));
-
-    cb.cp().process({"ZZ"}).AddSyst(cb, "ZZ_rate", "lnN", SystMap<>::init(1.1));
-
-    cb.cp().process({"WZ"}).AddSyst(cb, "WZ_rate", "lnN", SystMap<>::init(1.1));
+      }
+    }
+    else{
+      // use a dummy uncertainty if running only on stat
+      cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "dummy", "lnN", SystMap<>::init(1.001));
+    }
 
 
-    string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL/"+year+"/"; // relative link from this dir
+    string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_noData/"+year+"/"; // relative link from this dir
     string input_filename = dir+"CombineInput_"+WCname+"_"+WCpoint+".root";
 
 
