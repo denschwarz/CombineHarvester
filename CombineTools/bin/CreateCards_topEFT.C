@@ -184,9 +184,9 @@ int main(int argc, char *argv[]) {
 
         cb.cp().process({"ttZ"}).AddSyst(cb, "ttZ_rate", "lnN", SystMap<>::init(1.11));
 
-        cb.cp().process({"ZZ"}).AddSyst(cb, "ZZ_rate", "lnN", SystMap<>::init(1.1));
+        cb.cp().process({"ZZ"}).AddSyst(cb, "ZZ_rate", "lnN", SystMap<>::init(1.025));
 
-        cb.cp().process({"WZ"}).AddSyst(cb, "WZ_rate", "lnN", SystMap<>::init(1.1));
+        cb.cp().process({"WZ"}).AddSyst(cb, "WZ_rate", "lnN", SystMap<>::init(1.025));
 
       }
     }
