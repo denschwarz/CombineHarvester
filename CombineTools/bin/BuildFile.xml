@@ -23,6 +23,7 @@
 <bin file="YieldTable.cpp" name="YieldTable"></bin>
 <bin file="hzz4l.cpp" name="hzz4l"></bin>
 <bin file="CreateCards_topEFT.C" name="CreateCards_topEFT"></bin>
+<bin file="CreateCards_topEFT_threePoint.C" name="CreateCards_topEFT_threePoint"></bin>
 <bin file="CreateCards_FakeRate.C" name="CreateCards_FakeRate"></bin>
 <bin file="CreateCards_FakeRate_BRIL.C" name="CreateCards_FakeRate_BRIL"></bin>
 <bin file="CreateCards_FakeRate_tunePtCone.C" name="CreateCards_FakeRate_tunePtCone"></bin>
