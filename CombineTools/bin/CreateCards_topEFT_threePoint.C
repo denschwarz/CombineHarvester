@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if(argc < 2){
     cout << "[ERROR] Wrong usage you have to provide a minimum of 1 arguiment, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT_threePoint year" <<endl;
+    cout << "CreateCards_topEFT_threePoint year [light]" <<endl;
     return 0;
   }
 
@@ -28,9 +28,19 @@ int main(int argc, char *argv[]) {
   else if(strcmp(argv[1], "UL2016") == 0)   year = "UL2016";
   else if(strcmp(argv[1], "UL2017") == 0)   year = "UL2017";
   else if(strcmp(argv[1], "UL2018") == 0)   year = "UL2018";
+  else if(strcmp(argv[1], "ULRunII") == 0)  year = "ULRunII";
   else{
-    cout << "[ERROR] year " << argv[1] << " not known. Select a valid year [UL2016preVFP, UL2016, UL2017, UL2018]" <<endl;
+    cout << "[ERROR] year " << argv[1] << " not known. Select a valid year [UL2016preVFP, UL2016, UL2017, UL2018, ULRunII]" <<endl;
     return 0;
+  }
+
+  bool light = false;
+  if(argc > 2){
+    if(strcmp(argv[2], "light") == 0)  light = true;
+    else{
+      cout << "[ERROR] option " << argv[1] << " not known. Select a valid option [light]" <<endl;
+      return 0;
+    }
   }
 
   // First define the location of the "auxiliaries" directory where we can
@@ -58,10 +68,18 @@ int main(int argc, char *argv[]) {
 
   //signal
   vector<string> WCnames = {"cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"};
+  vector<string> WCnames_mix = {};
+  if(light){
+    WCnames = {"cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"};
+    WCnames_mix = {"cHq1Re1122_cHq1Re33", "cHq3Re1122_cHq3Re33"};
+  }
   vector<string> sig_procs = {"sm"};
   for(auto WCname: WCnames ){
     sig_procs.push_back("sm_lin_quad_"+WCname);
     sig_procs.push_back("sm_quad_"+WCname);
+  }
+  for(auto WCname_mix: WCnames_mix ){
+    sig_procs.push_back("sm_lin_quad_mixed_"+WCname_mix);
   }
 
   cb.AddObservations({"*"}, {"topEFT"}, {"13TeV"}, {year}, cats);
@@ -113,8 +131,21 @@ int main(int argc, char *argv[]) {
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PDF", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tZq",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tWZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_triBoson", "shape", SystMap<>::init(1.00));
+
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_WZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tZq",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tWZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_triBoson", "shape", SystMap<>::init(1.00));
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR", "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
@@ -132,7 +163,7 @@ int main(int argc, char *argv[]) {
   // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
   // ZZ and WZ from AN
 
-  vector<string> theoryUncerts = {"PDF", "ISR", "FSR", "muR", "muF"};
+  vector<string> theoryUncerts = {"PDF", "ISR", "FSR", "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson","muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson"};
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
   vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq"};
   vector<string> nonpromptUncerts = {"Fakerate", "rate_nonprompt"};
@@ -141,7 +172,6 @@ int main(int argc, char *argv[]) {
   vector<string> leptonUncerts = {"LepReco", "LepIDsys","LepIDstat_2016preVFP","LepIDstat_2016","LepIDstat_2017","LepIDstat_2018"};
   vector<string> jetUncerts = {"JES", "JER"};
   vector<string> otherExpUncerts = {"Trigger", "PU", "Prefire"};
-
 
   cb.cp().SetGroup("theory", theoryUncerts);
   cb.cp().SetGroup("rate_sig", rateSigUncerts);
@@ -155,6 +185,7 @@ int main(int argc, char *argv[]) {
 
 
   string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData/"+year+"/"; // relative link from this dir
+  if(light) dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_light_noData/"+year+"/"; // relative link from this dir
   string input_filename = dir+"CombineInput.root";
 
   cb.cp().backgrounds().ExtractShapes(
