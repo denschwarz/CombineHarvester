@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 
       if(!noFakerate){
         cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Fakerate", "shape", SystMap<>::init(1.00));
-        cb.cp().process({"nonprompt"}).AddSyst(cb, "nonprompt_rate", "lnN", SystMap<>::init(1.3)); //Flat 30%
+        // cb.cp().process({"nonprompt"}).AddSyst(cb, "nonprompt_rate", "lnN", SystMap<>::init(1.3)); //Flat 30%
       }
 
       cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Prefire", "shape", SystMap<>::init(1.00));
