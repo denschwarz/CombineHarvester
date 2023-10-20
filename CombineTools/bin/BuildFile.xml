@@ -27,6 +27,7 @@
 <bin file="CreateCards_FakeRate.C" name="CreateCards_FakeRate"></bin>
 <bin file="CreateCards_FakeRate_BRIL.C" name="CreateCards_FakeRate_BRIL"></bin>
 <bin file="CreateCards_FakeRate_tunePtCone.C" name="CreateCards_FakeRate_tunePtCone"></bin>
+<bin file="CreateCards_FakerateClosure.C" name="CreateCards_FakerateClosure"></bin>
 <use name="root"/>
 <use name="rootmath"/>
 <use name="roofit"/>

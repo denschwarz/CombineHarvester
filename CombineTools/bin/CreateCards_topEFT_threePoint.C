@@ -144,7 +144,14 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_161718", "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "Lumi_correlated_1718", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "PDF", "shape", SystMap<>::init(1.00));
+  vector<string> pdfstrings;
+  for(int i=0; i<100; i++){
+    string pdfstring = "PDF_"+to_string(i+1);
+    pdfstrings.push_back(pdfstring);
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, pdfstring, "shape", SystMap<>::init(1.00));
+  }
+
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "WZ_Njet_reweight", "shape", SystMap<>::init(1.00));
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
@@ -162,8 +169,21 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttX",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_triBoson", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_WZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_tZq",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_tWZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_triBoson", "shape", SystMap<>::init(1.00));
+
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_WZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_tZq",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_tWZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_triBoson", "shape", SystMap<>::init(1.00));
 
   // Rate uncertainties signals
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "rate_ttZ", "shape", SystMap<>::init(1.00));
@@ -174,11 +194,18 @@ int main(int argc, char *argv[]) {
   cb.cp().process({"ttX"}).AddSyst(cb, "rate_ttX", "lnN", SystMap<>::init(1.2));
   cb.cp().process({"triBoson"}).AddSyst(cb, "rate_triBoson", "lnN", SystMap<>::init(1.2));
   cb.cp().process({"tWZ"}).AddSyst(cb, "rate_tWZ", "lnN", SystMap<>::init(1.2));
-  cb.cp().process({"tZq"}).AddSyst(cb, "rate_tZq", "lnN", SystMap<>::init(1.033));
+  cb.cp().process({"tZq"}).AddSyst(cb, "rate_tZq", "lnN", SystMap<>::init(1.1));
   // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
   // ZZ and WZ from AN
 
-  vector<string> theoryUncerts = {"PDF", "ISR", "FSR", "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson","muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson"};
+  vector<string> theoryUncerts = {
+    "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson",
+    "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson",
+    "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
+    "muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
+    "WZ_Njet_reweight"
+  };
+  for(auto pdfstring: pdfstrings) theoryUncerts.push_back(pdfstring);
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
   vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq"};
   vector<string> nonpromptUncerts = {"Fakerate", "FakerateClosure_correlated_elec", "FakerateClosure_uncorrelated_elec_2016preVFP", "FakerateClosure_uncorrelated_elec_2016", "FakerateClosure_uncorrelated_elec_2017", "FakerateClosure_uncorrelated_elec_2018", "FakerateClosure_correlated_muon", "FakerateClosure_uncorrelated_muon_2016preVFP", "FakerateClosure_uncorrelated_muon_2016", "FakerateClosure_uncorrelated_muon_2017", "FakerateClosure_uncorrelated_muon_2018", "FakerateClosure_correlated_both", "FakerateClosure_uncorrelated_both_2016preVFP", "FakerateClosure_uncorrelated_both_2016", "FakerateClosure_uncorrelated_both_2017", "FakerateClosure_uncorrelated_both_2018"};
