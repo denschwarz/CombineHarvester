@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if(argc < 2){
     cout << "[ERROR] Wrong usage you have to provide a minimum of 1 arguiment, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT_threePoint year [light]" <<endl;
+    cout << "CreateCards_topEFT_threePoint year [light] [njetSplit] [scaleCorrelation]" <<endl;
     return 0;
   }
 
@@ -37,8 +37,29 @@ int main(int argc, char *argv[]) {
   bool light = false;
   if(argc > 2){
     if(strcmp(argv[2], "light") == 0)  light = true;
+    else if(strcmp(argv[2], "notlight") == 0)  light = false;
     else{
-      cout << "[ERROR] option " << argv[1] << " not known. Select a valid option [light]" <<endl;
+      cout << "[ERROR] option " << argv[2] << " not known. Select a valid option [light/notlight]" <<endl;
+      return 0;
+    }
+  }
+
+  bool njetSplit = false;
+  if(argc > 3){
+    if(strcmp(argv[3], "njetSplit") == 0)  njetSplit = true;
+    else if(strcmp(argv[3], "notnjetSplit") == 0)  njetSplit = false;
+    else{
+      cout << "[ERROR] option " << argv[3] << " not known. Select a valid option [njetSplit]" <<endl;
+      return 0;
+    }
+  }
+
+  bool scaleCorrelation = false;
+  if(argc > 4){
+    if(strcmp(argv[4], "scaleCorrelation") == 0)  scaleCorrelation = true;
+    else if(strcmp(argv[4], "notscaleCorrelation") == 0)  scaleCorrelation = false;
+    else{
+      cout << "[ERROR] option " << argv[4] << " not known. Select a valid option [scaleCorrelation]" <<endl;
       return 0;
     }
   }
@@ -61,6 +82,15 @@ int main(int argc, char *argv[]) {
     {2, "WZ__Z1_pt"},
     {3, "ttZ__Z1_pt"},
   };
+  if(njetSplit){
+    cats = {
+      {1, "ZZ__Z1_pt"},
+      {2, "WZ__Z1_pt"},
+      {3, "ttZ_3jets__Z1_pt"},
+      {4, "ttZ_4jets__Z1_pt"},
+    };
+  }
+
   // ch::Categories is just a typedef of vector<pair<int, string>>
 
   //bkg_procs
@@ -152,18 +182,29 @@ int main(int argc, char *argv[]) {
   }
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "WZ_Njet_reweight", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "WZ_heavyFlavour", "shape", SystMap<>::init(1.00));
 
+  if(scaleCorrelation){
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_diboson",       "shape", SystMap<>::init(1.00));
+  }
+  else{
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ZZ",       "shape", SystMap<>::init(1.00));
+  }
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ZZ",       "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttX",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_triBoson", "shape", SystMap<>::init(1.00));
 
+  if(scaleCorrelation){
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_diboson",       "shape", SystMap<>::init(1.00));
+  }
+  else{
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_WZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ZZ",       "shape", SystMap<>::init(1.00));
+  }
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_WZ",       "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ZZ",       "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttX",      "shape", SystMap<>::init(1.00));
@@ -203,8 +244,18 @@ int main(int argc, char *argv[]) {
     "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson",
     "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
     "muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
-    "WZ_Njet_reweight"
+    "WZ_Njet_reweight", "WZ_heavyFlavour"
   };
+  if(scaleCorrelation){
+    theoryUncerts = {
+      "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson",
+      "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson",
+      "muR_ttZ","muR_diboson","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
+      "muF_ttZ","muF_diboson","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
+      "WZ_Njet_reweight", "WZ_heavyFlavour"
+    };
+  }
+
   for(auto pdfstring: pdfstrings) theoryUncerts.push_back(pdfstring);
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
   vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq"};
@@ -225,9 +276,13 @@ int main(int argc, char *argv[]) {
   cb.cp().SetGroup("jet", jetUncerts);
   cb.cp().SetGroup("other_exp", otherExpUncerts);
 
+  string dirname_suffix = "";
+  if(light)            dirname_suffix+="_light";
+  if(njetSplit)        dirname_suffix+="_NjetSplit";
+  if(scaleCorrelation) dirname_suffix+="_scaleCorrelation";
 
-  string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData/"+year+"/"; // relative link from this dir
-  if(light) dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_light_noData/"+year+"/"; // relative link from this dir
+  // relative link from this dir
+  string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData"+dirname_suffix+"/"+year+"/";
   string input_filename = dir+"CombineInput.root";
 
   cb.cp().backgrounds().ExtractShapes(
