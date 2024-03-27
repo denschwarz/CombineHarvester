@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if(argc < 2){
     cout << "[ERROR] Wrong usage you have to provide a minimum of 1 arguiment, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT_threePoint year [light] [njetSplit] [scaleCorrelation]" <<endl;
+    cout << "CreateCards_topEFT_threePoint year [light] [njetSplit] [scaleCorrelation] [signalInjection]" <<endl;
     return 0;
   }
 
@@ -64,6 +64,34 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  bool signalInjection = false;
+  string signalInjectionString;
+  if(argc > 5){
+    if(strcmp(argv[5], "notsignalInjection") == 0) {
+      signalInjection = false;
+    }
+    else if(strcmp(argv[5], "signalInjectionLight") == 0){
+      signalInjection = true;
+      signalInjectionString = "signalInjectionLight";
+    }
+    else if(strcmp(argv[5], "signalInjectionHeavy") == 0){
+      signalInjection = true;
+      signalInjectionString = "signalInjectionHeavy";
+    }
+    else if(strcmp(argv[5], "signalInjectionMixed") == 0){
+      signalInjection = true;
+      signalInjectionString = "signalInjectionMixed";
+    }
+    else if(strcmp(argv[5], "signalInjectionWZjets") == 0){
+      signalInjection = true;
+      signalInjectionString = "signalInjectionWZjets";
+    }
+    else{
+      cout << "[ERROR] option " << argv[5] << " not known. Select a valid option [signalInjection]" <<endl;
+      return 0;
+    }
+  }
+
   // First define the location of the "auxiliaries" directory where we can
   // source the input files containing the datacard shapes
   //  string aux_shapes = string(getenv("CMSSW_BASE")) + "/src/auxiliaries/shapes/";
@@ -94,7 +122,7 @@ int main(int argc, char *argv[]) {
   // ch::Categories is just a typedef of vector<pair<int, string>>
 
   //bkg_procs
-  vector<string> bkg_procs = {"tWZ", "ttX", "tZq", "triBoson", "nonprompt"};
+  vector<string> bkg_procs = {"tWZ", "ttX", "tZq", "ggToZZ", "triBoson", "nonprompt"};
 
   //signal
   vector<string> WCnames = {"cHq1Re11", "cHq1Re22", "cHq1Re33", "cHq3Re11", "cHq3Re22", "cHq3Re33"};
@@ -106,7 +134,7 @@ int main(int argc, char *argv[]) {
   vector<string> sig_procs = {"sm"};
   for(auto WCname: WCnames ){
     sig_procs.push_back("sm_lin_quad_"+WCname);
-    sig_procs.push_back("sm_quad_"+WCname);
+    sig_procs.push_back("quad_"+WCname);
   }
   for(auto WCname_mix: WCnames_mix ){
     sig_procs.push_back("sm_lin_quad_mixed_"+WCname_mix);
@@ -195,6 +223,7 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ttX",      "shape", SystMap<>::init(1.00));
+  // cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muR_triBoson", "shape", SystMap<>::init(1.00));
 
   if(scaleCorrelation){
@@ -208,6 +237,7 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ttX",      "shape", SystMap<>::init(1.00));
+  // cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "muF_triBoson", "shape", SystMap<>::init(1.00));
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ttZ",      "shape", SystMap<>::init(1.00));
@@ -216,6 +246,7 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "ISR_triBoson", "shape", SystMap<>::init(1.00));
 
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ttZ",      "shape", SystMap<>::init(1.00));
@@ -224,6 +255,7 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ttX",      "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs, bkg_procs}) ).AddSyst(cb, "FSR_triBoson", "shape", SystMap<>::init(1.00));
 
   // Rate uncertainties signals
@@ -236,29 +268,30 @@ int main(int argc, char *argv[]) {
   cb.cp().process({"triBoson"}).AddSyst(cb, "rate_triBoson", "lnN", SystMap<>::init(1.2));
   cb.cp().process({"tWZ"}).AddSyst(cb, "rate_tWZ", "lnN", SystMap<>::init(1.2));
   cb.cp().process({"tZq"}).AddSyst(cb, "rate_tZq", "lnN", SystMap<>::init(1.1));
+  cb.cp().process({"ggToZZ"}).AddSyst(cb, "rate_ggToZZ", "lnN", SystMap<>::init(1.2));
   // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
   // ZZ and WZ from AN
 
   vector<string> theoryUncerts = {
-    "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson",
-    "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson",
-    "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
-    "muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
+    "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
+    "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson","FSR_ggToZZ",
+    "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",//"muR_ggToZZ",
+    "muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",//"muF_ggToZZ",
     "WZ_Njet_reweight", "WZ_heavyFlavour"
   };
   if(scaleCorrelation){
     theoryUncerts = {
-      "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson",
-      "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson",
-      "muR_ttZ","muR_diboson","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",
-      "muF_ttZ","muF_diboson","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",
+      "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
+      "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson","FSR_ggToZZ",
+      "muR_ttZ","muR_diboson","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",//"muR_ggToZZ",
+      "muF_ttZ","muF_diboson","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",//"muF_ggToZZ",
       "WZ_Njet_reweight", "WZ_heavyFlavour"
     };
   }
 
   for(auto pdfstring: pdfstrings) theoryUncerts.push_back(pdfstring);
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
-  vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq"};
+  vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq", "rate_ggToZZ"};
   vector<string> nonpromptUncerts = {"Fakerate", "FakerateClosure_correlated_elec", "FakerateClosure_uncorrelated_elec_2016preVFP", "FakerateClosure_uncorrelated_elec_2016", "FakerateClosure_uncorrelated_elec_2017", "FakerateClosure_uncorrelated_elec_2018", "FakerateClosure_correlated_muon", "FakerateClosure_uncorrelated_muon_2016preVFP", "FakerateClosure_uncorrelated_muon_2016", "FakerateClosure_uncorrelated_muon_2017", "FakerateClosure_uncorrelated_muon_2018", "FakerateClosure_correlated_both", "FakerateClosure_uncorrelated_both_2016preVFP", "FakerateClosure_uncorrelated_both_2016", "FakerateClosure_uncorrelated_both_2017", "FakerateClosure_uncorrelated_both_2018"};
   vector<string> lumiUncerts = {"Lumi_uncorrelated_2016","Lumi_uncorrelated_2017","Lumi_uncorrelated_2018","Lumi_correlated_161718","Lumi_correlated_1718"};
   vector<string> btagUncerts = {"BTag_b_correlated","BTag_l_correlated","BTag_b_uncorrelated_2016preVFP","BTag_l_uncorrelated_2016preVFP","BTag_b_uncorrelated_2016","BTag_l_uncorrelated_2016","BTag_b_uncorrelated_2017","BTag_l_uncorrelated_2017","BTag_b_uncorrelated_2018","BTag_l_uncorrelated_2018"};
@@ -280,6 +313,7 @@ int main(int argc, char *argv[]) {
   if(light)            dirname_suffix+="_light";
   if(njetSplit)        dirname_suffix+="_NjetSplit";
   if(scaleCorrelation) dirname_suffix+="_scaleCorrelation";
+  if(signalInjection)  dirname_suffix+="_"+signalInjectionString;
 
   // relative link from this dir
   string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData"+dirname_suffix+"/"+year+"/";
