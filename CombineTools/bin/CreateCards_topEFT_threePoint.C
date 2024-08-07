@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if(argc < 2){
     cout << "[ERROR] Wrong usage you have to provide a minimum of 1 arguiment, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT_threePoint year [light] [njetSplit] [scaleCorrelation] [signalInjection] [fluctuatePseudoData]" <<endl;
+    cout << "CreateCards_topEFT_threePoint [year] [light] [minus] [njetSplit] [scaleCorrelation] [signalInjection] [fluctuatePseudoData] [blind]" <<endl;
     return 0;
   }
 
@@ -44,60 +44,80 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  bool njetSplit = false;
+  bool minus = false;
   if(argc > 3){
-    if(strcmp(argv[3], "njetSplit") == 0)  njetSplit = true;
-    else if(strcmp(argv[3], "notnjetSplit") == 0)  njetSplit = false;
+    if(strcmp(argv[3], "minus") == 0)  minus = true;
+    else if(strcmp(argv[3], "notminus") == 0)  minus = false;
     else{
-      cout << "[ERROR] option " << argv[3] << " not known. Select a valid option [njetSplit]" <<endl;
+      cout << "[ERROR] option " << argv[3] << " not known. Select a valid option [minus/notminus]" <<endl;
+      return 0;
+    }
+  }
+
+  bool njetSplit = false;
+  if(argc > 4){
+    if(strcmp(argv[4], "njetSplit") == 0)  njetSplit = true;
+    else if(strcmp(argv[4], "notnjetSplit") == 0)  njetSplit = false;
+    else{
+      cout << "[ERROR] option " << argv[4] << " not known. Select a valid option [njetSplit]" <<endl;
       return 0;
     }
   }
 
   bool scaleCorrelation = false;
-  if(argc > 4){
-    if(strcmp(argv[4], "scaleCorrelation") == 0)  scaleCorrelation = true;
-    else if(strcmp(argv[4], "notscaleCorrelation") == 0)  scaleCorrelation = false;
+  if(argc > 5){
+    if(strcmp(argv[5], "scaleCorrelation") == 0)  scaleCorrelation = true;
+    else if(strcmp(argv[5], "notscaleCorrelation") == 0)  scaleCorrelation = false;
     else{
-      cout << "[ERROR] option " << argv[4] << " not known. Select a valid option [scaleCorrelation]" <<endl;
+      cout << "[ERROR] option " << argv[5] << " not known. Select a valid option [scaleCorrelation]" <<endl;
       return 0;
     }
   }
 
   bool signalInjection = false;
   string signalInjectionString;
-  if(argc > 5){
-    if(strcmp(argv[5], "notsignalInjection") == 0) {
+  if(argc > 6){
+    if(strcmp(argv[6], "notsignalInjection") == 0) {
       signalInjection = false;
     }
-    else if(strcmp(argv[5], "signalInjectionLight") == 0){
+    else if(strcmp(argv[6], "signalInjectionLight") == 0){
       signalInjection = true;
       signalInjectionString = "signalInjectionLight";
     }
-    else if(strcmp(argv[5], "signalInjectionHeavy") == 0){
+    else if(strcmp(argv[6], "signalInjectionHeavy") == 0){
       signalInjection = true;
       signalInjectionString = "signalInjectionHeavy";
     }
-    else if(strcmp(argv[5], "signalInjectionMixed") == 0){
+    else if(strcmp(argv[6], "signalInjectionMixed") == 0){
       signalInjection = true;
       signalInjectionString = "signalInjectionMixed";
     }
-    else if(strcmp(argv[5], "signalInjectionWZjets") == 0){
+    else if(strcmp(argv[6], "signalInjectionWZjets") == 0){
       signalInjection = true;
       signalInjectionString = "signalInjectionWZjets";
     }
     else{
-      cout << "[ERROR] option " << argv[5] << " not known. Select a valid option [signalInjection]" <<endl;
+      cout << "[ERROR] option " << argv[6] << " not known. Select a valid option [signalInjection]" <<endl;
       return 0;
     }
   }
 
   bool fluctuatePseudoData = false;
-  if(argc > 6){
-    if(strcmp(argv[6], "fluctuate") == 0)  fluctuatePseudoData = true;
-    else if(strcmp(argv[6], "notfluctuate") == 0)  fluctuatePseudoData = false;
+  if(argc > 7){
+    if(strcmp(argv[7], "fluctuate") == 0)  fluctuatePseudoData = true;
+    else if(strcmp(argv[7], "notfluctuate") == 0)  fluctuatePseudoData = false;
     else{
-      cout << "[ERROR] option " << argv[6] << " not known. Select a valid option [fluctuate/notfluctuate]" <<endl;
+      cout << "[ERROR] option " << argv[7] << " not known. Select a valid option [fluctuate/notfluctuate]" <<endl;
+      return 0;
+    }
+  }
+
+  bool unblind = false;
+  if(argc > 8){
+    if(strcmp(argv[8], "unblind") == 0)  unblind = true;
+    else if(strcmp(argv[8], "blind") == 0)  unblind = false;
+    else{
+      cout << "[ERROR] option " << argv[8] << " not known. Select a valid option [blind/unblind]" <<endl;
       return 0;
     }
   }
@@ -140,7 +160,11 @@ int main(int argc, char *argv[]) {
   vector<string> WCnames_mix = {};
   if(light){
     WCnames = {"cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"};
-    WCnames_mix = {"cHq1Re1122_cHq1Re33", "cHq3Re1122_cHq3Re33"};
+    WCnames_mix = {"cHq1Re1122_cHq1Re33","cHq1Re1122_cHq3Re1122","cHq1Re1122_cHq3Re33","cHq1Re33_cHq3Re1122","cHq1Re33_cHq3Re33","cHq3Re1122_cHq3Re33"};
+    if(minus){
+      WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"};
+      WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33"};
+    }
   }
   vector<string> sig_procs = {"sm"};
   for(auto WCname: WCnames ){
@@ -412,6 +436,7 @@ int main(int argc, char *argv[]) {
 
   string dirname_suffix = "";
   if(light)            dirname_suffix+="_light";
+  if(minus)            dirname_suffix+="_minus";
   if(njetSplit)        dirname_suffix+="_NjetSplit";
   if(scaleCorrelation) dirname_suffix+="_scaleCorrelation";
   if(signalInjection)  dirname_suffix+="_"+signalInjectionString;
@@ -419,6 +444,7 @@ int main(int argc, char *argv[]) {
 
   // relative link from this dir
   string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData"+dirname_suffix+"/"+year+"/";
+  if(unblind) dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint"+dirname_suffix+"/"+year+"/";
   string input_filename = dir+"CombineInput.root";
 
   cb.cp().backgrounds().ExtractShapes(
