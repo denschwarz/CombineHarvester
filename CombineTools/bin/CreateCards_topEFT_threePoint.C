@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if(argc < 2){
     cout << "[ERROR] Wrong usage you have to provide a minimum of 1 arguiment, only " << argc-1 << " provided." <<endl;
-    cout << "CreateCards_topEFT_threePoint [year] [light] [minus] [njetSplit] [scaleCorrelation] [signalInjection] [fluctuatePseudoData] [blind]" <<endl;
+    cout << "CreateCards_topEFT_threePoint [year] [light] [minus] [njetSplit] [scaleCorrelation] [signalInjection] [fluctuatePseudoData] [blind] [binning] [noQuad] [noSigSys] [SMZero] [half]" <<endl;
     return 0;
   }
 
@@ -45,11 +45,16 @@ int main(int argc, char *argv[]) {
   }
 
   bool minus = false;
+  bool minus_excludeTriplet = false;
   if(argc > 3){
     if(strcmp(argv[3], "minus") == 0)  minus = true;
+    else if(strcmp(argv[3], "excludeTriplet") == 0){
+      minus = true;
+      minus_excludeTriplet = true;
+    }
     else if(strcmp(argv[3], "notminus") == 0)  minus = false;
     else{
-      cout << "[ERROR] option " << argv[3] << " not known. Select a valid option [minus/notminus]" <<endl;
+      cout << "[ERROR] option " << argv[3] << " not known. Select a valid option [minus/notminus/excludeTriplet]" <<endl;
       return 0;
     }
   }
@@ -122,6 +127,75 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  bool newbinning = false;
+  string binningString;
+  if(argc > 9){
+    if(strcmp(argv[9], "defaultBinning") == 0)  newbinning = false;
+    else if(strcmp(argv[9], "A") == 0){
+      newbinning = true;
+      binningString = "binning-A";
+    }
+    else if(strcmp(argv[9], "B") == 0){
+      newbinning = true;
+      binningString = "binning-B";
+    }
+    else{
+      cout << "[ERROR] option " << argv[9] << " not known. Select a valid option [defaultBinning/binning-A/binning-B]" <<endl;
+      return 0;
+    }
+  }
+
+  bool noQuad = false;
+  if(argc > 10){
+    if(strcmp(argv[10], "noQuad") == 0)  noQuad = true;
+    else if(strcmp(argv[10], "useQuad") == 0)  noQuad = false;
+    else{
+      cout << "[ERROR] option " << argv[10] << " not known. Select a valid option [noQuad/useQuad]" <<endl;
+      return 0;
+    }
+  }
+
+  int sigSysMode = 0;
+  if(argc > 11){
+    if(strcmp(argv[11], "defaultSys") == 0)  sigSysMode = 1;
+    else if(strcmp(argv[11], "noSigSys") == 0)  sigSysMode = 2;
+    else if(strcmp(argv[11], "noEFTSys") == 0)  sigSysMode = 3;
+    else{
+      cout << "[ERROR] option " << argv[11] << " not known. Select a valid option [defaultSys/noSigSys/noEFTSys]" <<endl;
+      return 0;
+    }
+  }
+
+  string zeroString;
+  bool zeroMode = false;
+  if(argc > 12){
+    if(strcmp(argv[12], "SMZero") == 0){
+      zeroString = "SMZero";
+      zeroMode = true;
+    }
+    else if(strcmp(argv[12], "noZero") == 0){
+      zeroString = "noZero";
+      zeroMode = true;
+    }
+    else if(strcmp(argv[12], "defaultZero") == 0){
+      zeroString = "";
+    }
+    else{
+      cout << "[ERROR] option " << argv[12] << " not known. Select a valid option [defaultZero/SMZero/noZero]" <<endl;
+      return 0;
+    }
+  }
+
+  bool useHalf = false;
+  if(argc > 13){
+    if(strcmp(argv[13], "half") == 0)  useHalf = true;
+    else if(strcmp(argv[13], "nohalf") == 0)  useHalf = false;
+    else{
+      cout << "[ERROR] option " << argv[13] << " not known. Select a valid option [half/nohalf]" <<endl;
+      return 0;
+    }
+  }
+
   // First define the location of the "auxiliaries" directory where we can
   // source the input files containing the datacard shapes
   //  string aux_shapes = string(getenv("CMSSW_BASE")) + "/src/auxiliaries/shapes/";
@@ -162,8 +236,14 @@ int main(int argc, char *argv[]) {
     WCnames = {"cHq1Re1122", "cHq1Re33", "cHq3Re1122", "cHq3Re33"};
     WCnames_mix = {"cHq1Re1122_cHq1Re33","cHq1Re1122_cHq3Re1122","cHq1Re1122_cHq3Re33","cHq1Re33_cHq3Re1122","cHq1Re33_cHq3Re33","cHq3Re1122_cHq3Re33"};
     if(minus){
-      WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"};
-      WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33"};
+      // WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"};
+      // WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33"};
+      WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cW", "cWtil"};
+      WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33","cHqMRe1122_cW", "cHqMRe1122_cWtil","cHqMRe33_cW", "cHqMRe33_cWtil","cHq3MRe1122_cW", "cHq3MRe1122_cWtil","cHq3MRe33_cW", "cHq3MRe33_cWtil", "cW_cWtil"};
+      if(minus_excludeTriplet){
+        WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122"};
+        WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe33_cHq3MRe1122"};
+      }
     }
   }
   vector<string> sig_procs = {"sm"};
@@ -174,6 +254,16 @@ int main(int argc, char *argv[]) {
   for(auto WCname_mix: WCnames_mix ){
     sig_procs.push_back("sm_lin_quad_mixed_"+WCname_mix);
   }
+
+  vector<string> sig_procs_for_sys = sig_procs;
+  if(sigSysMode == 1)       sig_procs_for_sys = sig_procs;
+  else if(sigSysMode == 2)  sig_procs_for_sys = vector<string>();
+  else if(sigSysMode == 3)  sig_procs_for_sys = {"sm"};
+  else{
+    cout << "[ERROR] sigSysMode " << sigSysMode << " not known." <<endl;
+    return 0;
+  }
+
 
   cb.AddObservations({"*"}, {"topEFT"}, {"13TeV"}, {year}, cats);
   cb.AddProcesses({"*"},  {"topEFT"}, {"13TeV"}, {year}, bkg_procs, cats, false);
@@ -188,92 +278,92 @@ int main(int argc, char *argv[]) {
 
   // Shape uncertainties
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_correlated", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_correlated", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_correlated", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_correlated", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_b_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "BTag_l_uncorrelated_2018", "shape", SystMap<>::init(1.00));
 
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Trigger_2018", "shape", SystMap<>::init(1.00));
 
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "PU", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "PU", "shape", SystMap<>::init(1.00));
 
   // cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteMPFBias", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteScale", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeBal", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeFSR", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJERHF", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtBB", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtHF", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpDataMC", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtBB", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtEC1", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtEC2", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtHF", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtRef", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_FlavorQCD", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_Fragmentation", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_SinglePionECAL", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_SinglePionHCAL", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteMPFBias", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteScale", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_AbsoluteStat_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeBal", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeFSR", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC1_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJEREC2_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeJERHF", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtBB", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC1_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtEC2_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativePtHF", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatEC_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatFSR_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeStatHF_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_RelativeSample_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpDataMC", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtBB", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtEC1", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtEC2", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtHF", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_PileUpPtRef", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_FlavorQCD", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_Fragmentation", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_SinglePionECAL", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_SinglePionHCAL", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JES_TimePtEta_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "JER_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2018", "shape", SystMap<>::init(1.00));
 
   cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate", "shape", SystMap<>::init(1.00));
   cb.cp().process({"nonprompt"}).AddSyst(cb, "FakerateClosure_correlated_elec", "shape", SystMap<>::init(1.00));
@@ -293,46 +383,46 @@ int main(int argc, char *argv[]) {
   cb.cp().process({"nonprompt"}).AddSyst(cb, "FakerateClosure_uncorrelated_both_2018", "shape", SystMap<>::init(1.00));
   // cb.cp().process({"nonprompt"}).AddSyst(cb, "rate_nonprompt", "lnN", SystMap<>::init(1.3)); //Flat 30%
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Prefire", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Prefire", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepReco", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepReco", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDsys_muon", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDsys_muon", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_muon_2018", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDsys_elec", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2016preVFP", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDsys_elec", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "LepIDstat_elec_2018", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2016", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2017", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2018", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_correlated_161718", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_correlated_1718", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_uncorrelated_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_correlated_161718", "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Lumi_correlated_1718", "shape", SystMap<>::init(1.00));
 
   vector<string> pdfstrings;
   for(int i=0; i<100; i++){
     string pdfstring = "PDF_"+to_string(i+1);
     pdfstrings.push_back(pdfstring);
-    cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, pdfstring, "shape", SystMap<>::init(1.00));
+    cb.cp().process( ch::JoinStr({ sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, pdfstring, "shape", SystMap<>::init(1.00));
   }
 
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "WZ_Njet_reweight", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "WZ_heavyFlavour", "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "WZ_Njet_reweight", "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "WZ_heavyFlavour", "shape", SystMap<>::init(1.00));
 
   if(scaleCorrelation){
-    cb.cp().process(ch::JoinStr({sig_procs})).AddSyst(cb, "muR_diboson",       "shape", SystMap<>::init(1.00));
+    cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muR_diboson",       "shape", SystMap<>::init(1.00));
   }
   else{
-    cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muR_ZZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muR_WZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muR_ZZ",       "shape", SystMap<>::init(1.00));
   }
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muR_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muR_ttZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"tZq"}).AddSyst(cb, "muR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"tWZ"}).AddSyst(cb, "muR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"ttX"}).AddSyst(cb, "muR_ttX",      "shape", SystMap<>::init(1.00));
@@ -340,37 +430,37 @@ int main(int argc, char *argv[]) {
   cb.cp().process({"triBoson"}).AddSyst(cb, "muR_triBoson", "shape", SystMap<>::init(1.00));
 
   if(scaleCorrelation){
-    cb.cp().process(ch::JoinStr({sig_procs})).AddSyst(cb, "muF_diboson",       "shape", SystMap<>::init(1.00));
+    cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muF_diboson",       "shape", SystMap<>::init(1.00));
   }
   else{
-    cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muF_WZ",       "shape", SystMap<>::init(1.00));
-    cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muF_ZZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process( sig_procs_for_sys ).AddSyst(cb, "muF_WZ",       "shape", SystMap<>::init(1.00));
+    cb.cp().process( sig_procs_for_sys ).AddSyst(cb, "muF_ZZ",       "shape", SystMap<>::init(1.00));
   }
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "muF_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "muF_ttZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"tZq"}).AddSyst(cb, "muF_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"tWZ"}).AddSyst(cb, "muF_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"ttX"}).AddSyst(cb, "muF_ttX",      "shape", SystMap<>::init(1.00));
   // cb.cp().process({"ggToZZ"}).AddSyst(cb, "muF_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process({"triBoson"}).AddSyst(cb, "muF_triBoson", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "EWK_mul_WZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "EWK_mul_ZZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "EWK_add_WZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "EWK_add_ZZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "EWK_mul_WZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "EWK_mul_ZZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "EWK_add_WZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "EWK_add_ZZ",      "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "ISR_ttZ",      "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "ISR_WZ",       "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "ISR_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "ISR_ttZ",      "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "ISR_WZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "ISR_ZZ",       "shape", SystMap<>::init(1.00));
   cb.cp().process({"tZq"}).AddSyst(cb, "ISR_tZq",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"tWZ"}).AddSyst(cb, "ISR_tWZ",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"ttX"}).AddSyst(cb, "ISR_ttX",      "shape", SystMap<>::init(1.00));
   cb.cp().process({"ggToZZ"}).AddSyst(cb, "ISR_ggToZZ",   "shape", SystMap<>::init(1.00));
   cb.cp().process({"triBoson"}).AddSyst(cb, "ISR_triBoson", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process( ch::JoinStr({sig_procs, bkg_procs_no_nonprompt}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
-  // cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "FSR_ttZ",      "shape", SystMap<>::init(1.00));
-  // cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "FSR_WZ",       "shape", SystMap<>::init(1.00));
-  // cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "FSR_ZZ",       "shape", SystMap<>::init(1.00));
+  cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "FSR", "shape", SystMap<>::init(1.00));
+  // cb.cp().process( ch::JoinStr({sig_procs_for_sys}) ).AddSyst(cb, "FSR_ttZ",      "shape", SystMap<>::init(1.00));
+  // cb.cp().process( ch::JoinStr({sig_procs_for_sys}) ).AddSyst(cb, "FSR_WZ",       "shape", SystMap<>::init(1.00));
+  // cb.cp().process( ch::JoinStr({sig_procs_for_sys}) ).AddSyst(cb, "FSR_ZZ",       "shape", SystMap<>::init(1.00));
   // cb.cp().process({"tZq"}).AddSyst(cb, "FSR_tZq",      "shape", SystMap<>::init(1.00));
   // cb.cp().process({"tWZ"}).AddSyst(cb, "FSR_tWZ",      "shape", SystMap<>::init(1.00));
   // cb.cp().process({"ttX"}).AddSyst(cb, "FSR_ttX",      "shape", SystMap<>::init(1.00));
@@ -378,9 +468,9 @@ int main(int argc, char *argv[]) {
   // cb.cp().process({"triBoson"}).AddSyst(cb, "FSR_triBoson", "shape", SystMap<>::init(1.00));
 
   // Rate uncertainties signals
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "rate_ttZ", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "rate_WZ", "shape", SystMap<>::init(1.00));
-  cb.cp().process( ch::JoinStr({sig_procs}) ).AddSyst(cb, "rate_ZZ", "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "rate_ttZ", "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "rate_WZ", "shape", SystMap<>::init(1.00));
+  cb.cp().process(sig_procs_for_sys).AddSyst(cb, "rate_ZZ", "shape", SystMap<>::init(1.00));
 
   // Rate uncertainties backgrounds
   cb.cp().process({"ttX"}).AddSyst(cb, "rate_ttX", "lnN", SystMap<>::init(1.2));
@@ -391,30 +481,29 @@ int main(int argc, char *argv[]) {
   // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
   // ZZ and WZ from AN
 
-  vector<string> theoryUncerts = {
+  vector<string> PSUncerts = {
     "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
-    "FSR",
-    // "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson","FSR_ggToZZ",
-    "muR_ttZ","muR_WZ","muR_ZZ","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",//"muR_ggToZZ",
-    "muF_ttZ","muF_WZ","muF_ZZ","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",//"muF_ggToZZ",
-    "WZ_Njet_reweight", "WZ_heavyFlavour",
+    "FSR"
+  };
+  vector<string> scaleUncerts_sig = {
+    "muR_ttZ","muR_WZ","muR_ZZ",
+    "muF_ttZ","muF_WZ","muF_ZZ"
+  };
+  vector<string> scaleUncerts_bkg = {
+    "muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",//"muR_ggToZZ",
+    "muF_tZq","muF_tWZ","muF_ttX","muF_triBoson"//,"muF_ggToZZ",
+  };
+  vector<string> WZUncerts = {"WZ_Njet_reweight", "WZ_heavyFlavour"};
+  vector<string> EWKUncerts = {
     "EWK_mul_WZ", "EWK_mul_ZZ",
     "EWK_add_WZ", "EWK_add_ZZ"
   };
   if(scaleCorrelation){
-    theoryUncerts = {
-      "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
-      "FSR",
-      // "FSR_ttZ","FSR_WZ","FSR_ZZ","FSR_tZq","FSR_tWZ","FSR_ttX","FSR_triBoson","FSR_ggToZZ",
-      "muR_ttZ","muR_diboson","muR_tZq","muR_tWZ","muR_ttX","muR_triBoson",//"muR_ggToZZ",
-      "muF_ttZ","muF_diboson","muF_tZq","muF_tWZ","muF_ttX","muF_triBoson",//"muF_ggToZZ",
-      "WZ_Njet_reweight", "WZ_heavyFlavour",
-      "EWK_mul_WZ", "EWK_mul_ZZ",
-      "EWK_add_WZ", "EWK_add_ZZ"
-    };
+    scaleUncerts_sig = {"muR_ttZ","muR_diboson","muF_ttZ","muF_diboson"};
   }
 
-  for(auto pdfstring: pdfstrings) theoryUncerts.push_back(pdfstring);
+  vector<string> pdfUncerts;
+  for(auto pdfstring: pdfstrings) pdfUncerts.push_back(pdfstring);
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
   vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq", "rate_ggToZZ"};
   vector<string> nonpromptUncerts = {"Fakerate", "FakerateClosure_correlated_elec", "FakerateClosure_uncorrelated_elec_2016preVFP", "FakerateClosure_uncorrelated_elec_2016", "FakerateClosure_uncorrelated_elec_2017", "FakerateClosure_uncorrelated_elec_2018", "FakerateClosure_correlated_muon", "FakerateClosure_uncorrelated_muon_2016preVFP", "FakerateClosure_uncorrelated_muon_2016", "FakerateClosure_uncorrelated_muon_2017", "FakerateClosure_uncorrelated_muon_2018", "FakerateClosure_correlated_both", "FakerateClosure_uncorrelated_both_2016preVFP", "FakerateClosure_uncorrelated_both_2016", "FakerateClosure_uncorrelated_both_2017", "FakerateClosure_uncorrelated_both_2018"};
@@ -424,7 +513,12 @@ int main(int argc, char *argv[]) {
   vector<string> otherExpUncerts = {"Trigger_2016preVFP", "Trigger_2016", "Trigger_2017", "Trigger_2018", "PU", "Prefire"};
   vector<string> jetUncerts = {"JER_2016preVFP", "JER_2016", "JER_2017", "JER_2018", "Unclustered_2016preVFP", "Unclustered_2016", "Unclustered_2017", "Unclustered_2018", "JES_AbsoluteMPFBias",    "JES_AbsoluteScale",  "JES_AbsoluteStat_2016preVFP",  "JES_AbsoluteStat_2016",  "JES_AbsoluteStat_2017",  "JES_AbsoluteStat_2018",  "JES_RelativeBal",  "JES_RelativeFSR",  "JES_RelativeJEREC1_2016preVFP",  "JES_RelativeJEREC1_2016",  "JES_RelativeJEREC1_2017",  "JES_RelativeJEREC1_2018",  "JES_RelativeJEREC2_2016preVFP",  "JES_RelativeJEREC2_2016",  "JES_RelativeJEREC2_2017",  "JES_RelativeJEREC2_2018",  "JES_RelativeJERHF",  "JES_RelativePtBB",  "JES_RelativePtEC1_2016preVFP",  "JES_RelativePtEC1_2016",  "JES_RelativePtEC1_2017",  "JES_RelativePtEC1_2018",  "JES_RelativePtEC2_2016preVFP",  "JES_RelativePtEC2_2016",  "JES_RelativePtEC2_2017",  "JES_RelativePtEC2_2018",  "JES_RelativePtHF",  "JES_RelativeStatEC_2016preVFP",  "JES_RelativeStatEC_2016",  "JES_RelativeStatEC_2017",  "JES_RelativeStatEC_2018",  "JES_RelativeStatFSR_2016preVFP",  "JES_RelativeStatFSR_2016",  "JES_RelativeStatFSR_2017",  "JES_RelativeStatFSR_2018",  "JES_RelativeStatHF_2016preVFP",  "JES_RelativeStatHF_2016",  "JES_RelativeStatHF_2017",  "JES_RelativeStatHF_2018",  "JES_RelativeSample_2016preVFP",  "JES_RelativeSample_2016",  "JES_RelativeSample_2017",  "JES_RelativeSample_2018", "JES_PileUpDataMC",  "JES_PileUpPtBB",  "JES_PileUpPtEC1",  "JES_PileUpPtEC2",  "JES_PileUpPtHF",  "JES_PileUpPtRef",  "JES_FlavorQCD",  "JES_Fragmentation",  "JES_SinglePionECAL","JES_SinglePionHCAL","JES_TimePtEta_2016preVFP","JES_TimePtEta_2016","JES_TimePtEta_2017","JES_TimePtEta_2018"};
 
-  cb.cp().SetGroup("theory", theoryUncerts);
+  cb.cp().SetGroup("ps", PSUncerts);
+  cb.cp().SetGroup("scale_sig", scaleUncerts_sig);
+  cb.cp().SetGroup("scale_bkg", scaleUncerts_bkg);
+  cb.cp().SetGroup("wz", WZUncerts);
+  cb.cp().SetGroup("ewk", EWKUncerts);
+  cb.cp().SetGroup("pdf", pdfUncerts);
   cb.cp().SetGroup("rate_sig", rateSigUncerts);
   cb.cp().SetGroup("rate_bkg", rateBkgUncerts);
   cb.cp().SetGroup("nonprompt", nonpromptUncerts);
@@ -441,6 +535,10 @@ int main(int argc, char *argv[]) {
   if(scaleCorrelation) dirname_suffix+="_scaleCorrelation";
   if(signalInjection)  dirname_suffix+="_"+signalInjectionString;
   if(fluctuatePseudoData) dirname_suffix+="_fluctuatePseudoData";
+  if(newbinning)       dirname_suffix+="_"+binningString;
+  if(noQuad)           dirname_suffix+="_noQuad";
+  if(zeroMode)         dirname_suffix+="_"+zeroString;
+  if(useHalf)          dirname_suffix+="_HALF";
 
   // relative link from this dir
   string dir = "../../../../../../../groups/hephy/cms/dennis.schwarz/www/tWZ/CombineInput_UL_threePoint_noData"+dirname_suffix+"/"+year+"/";
