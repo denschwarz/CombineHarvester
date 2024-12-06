@@ -238,8 +238,54 @@ int main(int argc, char *argv[]) {
     if(minus){
       // WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33"};
       // WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33"};
-      WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cW", "cWtil"};
-      WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe1122_cHq3MRe33","cHqMRe33_cHq3MRe1122","cHqMRe33_cHq3MRe33","cHq3MRe1122_cHq3MRe33","cHqMRe1122_cW", "cHqMRe1122_cWtil","cHqMRe33_cW", "cHqMRe33_cWtil","cHq3MRe1122_cW", "cHq3MRe1122_cWtil","cHq3MRe33_cW", "cHq3MRe33_cWtil", "cW_cWtil"};
+      WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122", "cHq3MRe33", "cHuRe1122", "cHuRe33", "cHdRe1122", "cHdRe33", "cW", "cWtil"};
+      WCnames_mix = {
+          "cHqMRe1122_cHqMRe33",
+          "cHqMRe1122_cHq3MRe1122",
+          "cHqMRe1122_cHq3MRe33",
+          "cHqMRe1122_cHuRe1122",
+          "cHqMRe1122_cHuRe33",
+          "cHqMRe1122_cHdRe1122",
+          "cHqMRe1122_cHdRe33",
+          "cHqMRe1122_cW",
+          "cHqMRe1122_cWtil",
+          "cHqMRe33_cHq3MRe1122",
+          "cHqMRe33_cHq3MRe33",
+          "cHqMRe33_cHuRe1122",
+          "cHqMRe33_cHuRe33",
+          "cHqMRe33_cHdRe1122",
+          "cHqMRe33_cHdRe33",
+          "cHqMRe33_cW",
+          "cHqMRe33_cWtil",
+          "cHq3MRe1122_cHq3MRe33",
+          "cHq3MRe1122_cHuRe1122",
+          "cHq3MRe1122_cHuRe33",
+          "cHq3MRe1122_cHdRe1122",
+          "cHq3MRe1122_cHdRe33",
+          "cHq3MRe1122_cW",
+          "cHq3MRe1122_cWtil",
+          "cHq3MRe33_cHuRe1122",
+          "cHq3MRe33_cHuRe33",
+          "cHq3MRe33_cHdRe1122",
+          "cHq3MRe33_cHdRe33",
+          "cHq3MRe33_cW",
+          "cHq3MRe33_cWtil",
+          "cHuRe1122_cHuRe33",
+          "cHuRe1122_cHdRe1122",
+          "cHuRe1122_cHdRe33",
+          "cHuRe1122_cW",
+          "cHuRe1122_cWtil",
+          "cHuRe33_cHdRe1122",
+          "cHuRe33_cHdRe33",
+          "cHuRe33_cW",
+          "cHuRe33_cWtil",
+          "cHdRe1122_cHdRe33",
+          "cHdRe1122_cW",
+          "cHdRe1122_cWtil",
+          "cHdRe33_cW",
+          "cHdRe33_cWtil",
+          "cW_cWtil"
+      };
       if(minus_excludeTriplet){
         WCnames = {"cHqMRe1122", "cHqMRe33", "cHq3MRe1122"};
         WCnames_mix = {"cHqMRe1122_cHqMRe33","cHqMRe1122_cHq3MRe1122","cHqMRe33_cHq3MRe1122"};
@@ -365,7 +411,14 @@ int main(int argc, char *argv[]) {
   cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2017", "shape", SystMap<>::init(1.00));
   cb.cp().process( ch::JoinStr({sig_procs_for_sys, bkg_procs_no_nonprompt}) ).AddSyst(cb, "Unclustered_2018", "shape", SystMap<>::init(1.00));
 
-  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_elec_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_elec_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_elec_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_elec_2018", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_muon_2016preVFP", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_muon_2016", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_muon_2017", "shape", SystMap<>::init(1.00));
+  cb.cp().process({"nonprompt"}).AddSyst(cb, "Fakerate_muon_2018", "shape", SystMap<>::init(1.00));
   cb.cp().process({"nonprompt"}).AddSyst(cb, "FakerateClosure_correlated_elec", "shape", SystMap<>::init(1.00));
   cb.cp().process({"nonprompt"}).AddSyst(cb, "FakerateClosure_uncorrelated_elec_2016preVFP", "shape", SystMap<>::init(1.00));
   cb.cp().process({"nonprompt"}).AddSyst(cb, "FakerateClosure_uncorrelated_elec_2016", "shape", SystMap<>::init(1.00));
@@ -481,6 +534,10 @@ int main(int argc, char *argv[]) {
   // ttZ, tZq and tWZ numbers from https://link.springer.com/content/pdf/10.1007/JHEP12(2021)083.pdf
   // ZZ and WZ from AN
 
+  // EFT uncertainties
+  cb.cp().process({"tWZ"}).AddSyst(cb, "eft_tWZ", "lnN", SystMap<>::init(1.2));
+  cb.cp().process({"tZq"}).AddSyst(cb, "eft_tZq", "lnN", SystMap<>::init(1.2));
+
   vector<string> PSUncerts = {
     "ISR_ttZ","ISR_WZ","ISR_ZZ","ISR_tZq","ISR_tWZ","ISR_ttX","ISR_triBoson","ISR_ggToZZ",
     "FSR"
@@ -506,6 +563,8 @@ int main(int argc, char *argv[]) {
   for(auto pdfstring: pdfstrings) pdfUncerts.push_back(pdfstring);
   vector<string> rateSigUncerts = {"rate_ttZ", "rate_WZ", "rate_ZZ"};
   vector<string> rateBkgUncerts = {"rate_ttX", "rate_triBoson", "rate_tWZ", "rate_tZq", "rate_ggToZZ"};
+  vector<string> eftBkgUncerts = {"eft_tWZ", "eft_tZq"};
+
   vector<string> nonpromptUncerts = {"Fakerate", "FakerateClosure_correlated_elec", "FakerateClosure_uncorrelated_elec_2016preVFP", "FakerateClosure_uncorrelated_elec_2016", "FakerateClosure_uncorrelated_elec_2017", "FakerateClosure_uncorrelated_elec_2018", "FakerateClosure_correlated_muon", "FakerateClosure_uncorrelated_muon_2016preVFP", "FakerateClosure_uncorrelated_muon_2016", "FakerateClosure_uncorrelated_muon_2017", "FakerateClosure_uncorrelated_muon_2018", "FakerateClosure_correlated_both", "FakerateClosure_uncorrelated_both_2016preVFP", "FakerateClosure_uncorrelated_both_2016", "FakerateClosure_uncorrelated_both_2017", "FakerateClosure_uncorrelated_both_2018"};
   vector<string> lumiUncerts = {"Lumi_uncorrelated_2016","Lumi_uncorrelated_2017","Lumi_uncorrelated_2018","Lumi_correlated_161718","Lumi_correlated_1718"};
   vector<string> btagUncerts = {"BTag_b_correlated","BTag_l_correlated","BTag_b_uncorrelated_2016preVFP","BTag_l_uncorrelated_2016preVFP","BTag_b_uncorrelated_2016","BTag_l_uncorrelated_2016","BTag_b_uncorrelated_2017","BTag_l_uncorrelated_2017","BTag_b_uncorrelated_2018","BTag_l_uncorrelated_2018"};
@@ -521,6 +580,7 @@ int main(int argc, char *argv[]) {
   cb.cp().SetGroup("pdf", pdfUncerts);
   cb.cp().SetGroup("rate_sig", rateSigUncerts);
   cb.cp().SetGroup("rate_bkg", rateBkgUncerts);
+  cb.cp().SetGroup("eft_bkg", eftBkgUncerts);
   cb.cp().SetGroup("nonprompt", nonpromptUncerts);
   cb.cp().SetGroup("lumi", lumiUncerts);
   cb.cp().SetGroup("btag", btagUncerts);
